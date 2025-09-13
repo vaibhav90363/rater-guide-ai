@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { NavLink } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,7 @@ import {
   Play,
   Pause,
   Settings,
+  ArrowRight,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -35,57 +37,33 @@ const Projects = () => {
 
   const projects = [
     {
-      id: "PRJ001",
-      name: "Content Moderation - Social Media",
-      description: "Automated content review for social media platform with safety guidelines",
+      id: "rater-pq-grid",
+      name: "Rater PQ Grid Project",
+      description: "Content quality rating with grid-based evaluation system for raters",
       status: "active",
       raterCount: 156,
       qcThroughput: "847 reviews/day", 
       accuracy: "94.2%",
       createdAt: "2024-01-15",
       workflows: 3,
-      guidelines: "Safety Policy v2.1",
+      guidelines: "PQ Grid Guidelines v2.1",
       lastActivity: "2 hours ago",
+      type: "rater"
     },
     {
-      id: "PRJ002", 
-      name: "E-commerce Product Reviews",
-      description: "Quality assessment of product reviews for authenticity and helpfulness",
+      id: "qc-internal-flags", 
+      name: "QC Internal Flags Project",
+      description: "Internal quality control and flagging system for review processes",
       status: "active",
-      raterCount: 89,
-      qcThroughput: "312 reviews/day",
-      accuracy: "91.8%", 
-      createdAt: "2024-02-03",
-      workflows: 2,
-      guidelines: "Product Review Guidelines v1.5",
-      lastActivity: "1 day ago",
-    },
-    {
-      id: "PRJ003",
-      name: "Legal Document Analysis",
-      description: "Classification and extraction from legal contracts and agreements", 
-      status: "paused",
       raterCount: 23,
       qcThroughput: "124 reviews/day",
-      accuracy: "96.1%",
+      accuracy: "96.1%", 
       createdAt: "2023-11-28",
-      workflows: 5,
-      guidelines: "Legal Analysis Framework v3.0",
-      lastActivity: "5 days ago",
-    },
-    {
-      id: "PRJ004",
-      name: "Medical Image Annotation",
-      description: "Radiological image review and diagnostic annotation workflow",
-      status: "active", 
-      raterCount: 34,
-      qcThroughput: "89 reviews/day",
-      accuracy: "98.3%",
-      createdAt: "2024-01-22",
-      workflows: 1,
-      guidelines: "Medical Imaging Standards v2.0",
-      lastActivity: "30 minutes ago",
-    },
+      workflows: 2,
+      guidelines: "QC Flagging Framework v3.0",
+      lastActivity: "1 hour ago",
+      type: "qc"
+    }
   ];
 
   const getStatusColor = (status: string) => {
@@ -230,12 +208,12 @@ const Projects = () => {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2 pt-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    View Dashboard
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
-                    Manage Workflows
-                  </Button>
+                  <NavLink to={`/projects/${project.id}`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full">
+                      View Project
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </NavLink>
                 </div>
               </div>
             </CardContent>

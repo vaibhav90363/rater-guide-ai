@@ -24,10 +24,6 @@ import {
 const navigationItems = [
   { title: "Dashboard", url: "/", icon: BarChart3 },
   { title: "Projects", url: "/projects", icon: FolderOpen },
-  { title: "Workflow Builder", url: "/workflow-builder", icon: GitBranch },
-  { title: "Knowledge Base", url: "/knowledge-base", icon: BookOpen },
-  { title: "Rater Profiles", url: "/rater-profiles", icon: Users },
-  { title: "QC Dashboard", url: "/qc-dashboard", icon: ShieldCheck },
 ];
 
 const pluginItems = [

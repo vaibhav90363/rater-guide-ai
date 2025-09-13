@@ -1,388 +1,234 @@
 import { useState } from "react";
+import RaterPlatform from "./RaterPlatform";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Progress } from "@/components/ui/progress";
-import {
-  MessageSquare,
-  CheckSquare,
-  Bot,
-  Sparkles,
-  Send,
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  Bot, 
+  MessageSquare, 
+  Star, 
+  CheckCircle, 
+  Lightbulb, 
   BookOpen,
-  ExternalLink,
-  ThumbsUp,
-  ThumbsDown,
-  History,
-  CreditCard,
-  Camera,
+  X,
+  Send,
+  Minimize2,
+  Maximize2
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const RaterPlugin = () => {
-  const [activeMode, setActiveMode] = useState("rate");
+  const [showPlugin, setShowPlugin] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [activeMode, setActiveMode] = useState("chat");
   const [chatMessage, setChatMessage] = useState("");
-  const [checklist, setChecklist] = useState({
-    content_reviewed: false,
-    guideline_checked: false,
-    context_analyzed: false,
-    confidence_assessed: false,
-  });
-
-  const aiSuggestion = {
-    rating: {
-      safety: "unsafe",
-      category: "political_content", 
-      severity: "medium",
-      action: "flag_for_review",
-    },
-    confidence: 0.87,
-    reasoning: "Content contains political messaging with potential for controversy. Safety guidelines section 3.2.1 indicates this should be flagged for human review.",
-    evidence: [
-      "Political content policy (Section 3.2.1)",
-      "Similar case: TSK_4321 - flagged correctly",
-      "Keyword analysis: 95% political indicators",
-    ],
-    suggestedNext: "Review context for additional nuance before final decision",
-  };
-
+  
   const chatHistory = [
     {
-      id: 1,
       type: "user",
-      message: "What does the safety policy say about political content in social media posts?",
-      timestamp: "14:23",
+      message: "What should I focus on when rating this product review?",
+      timestamp: "14:30"
     },
     {
-      id: 2,
-      type: "assistant", 
-      message: "According to Section 3.2.1 of the Safety Policy Guidelines v2.1, political content should be evaluated for:\n\n1. **Inflammatory language** - Check for divisive rhetoric\n2. **Misinformation potential** - Verify factual claims\n3. **Harassment targeting** - Look for attacks on individuals\n\nPolitical opinions alone are generally allowed unless they violate other community standards.",
-      timestamp: "14:23",
-      citations: ["Safety Policy v2.1 - Section 3.2.1", "Community Standards - Political Content"],
-    },
-    {
-      id: 3,
-      type: "user",
-      message: "How should I rate this specific post about upcoming elections?",
-      timestamp: "14:24",
-    },
+      type: "ai",
+      message: "For product reviews, focus on these key areas:\n\n1. **Relevance** - Does the review address the actual product?\n2. **Specificity** - Are there concrete details about features/performance?\n3. **Balance** - Does it mention both pros and cons appropriately?\n4. **Authenticity** - Does the language seem natural and genuine?\n\nFor this review, I notice it's positive and mentions specific aspects like 'build quality' and 'packaging' - good signs of authenticity.",
+      timestamp: "14:31",
+      confidence: 92,
+      sources: ["Product Review Guidelines v2.1", "Authenticity Checklist"]
+    }
   ];
 
+  const aiSuggestion = {
+    rating: "Good",
+    confidence: 87,
+    reasoning: "Content shows specific product details and balanced perspective. Language appears authentic with concrete examples.",
+    guidelines: ["Relevance Check", "Authenticity Assessment", "Detail Analysis"]
+  };
+
+  if (!showPlugin) {
+    return <RaterPlatform onPluginToggle={() => setShowPlugin(true)} showPlugin={false} />;
+  }
+
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Rater Plugin Interface</h1>
-          <p className="text-muted-foreground mt-1">
-            AI-powered assistant for rating tasks with contextual guidance
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="bg-success/10 text-success">
-            <div className="w-2 h-2 bg-success rounded-full mr-2" />
-            Plugin Active
-          </Badge>
-          <Button variant="outline" size="sm">
-            <Camera className="w-4 h-4 mr-2" />
-            Take Screenshot
-          </Button>
-        </div>
-      </div>
-
-      {/* Plugin Interface */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Plugin Window */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="shadow-enterprise">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Bot className="w-5 h-5 text-primary" />
-                  <CardTitle>AI Rater Assistant</CardTitle>
-                </div>
-                <Badge variant="outline" className="bg-gradient-primary text-white border-0">
-                  Premium
-                </Badge>
+    <div className="relative">
+      <RaterPlatform onPluginToggle={() => setShowPlugin(false)} showPlugin={true} />
+      
+      {/* Plugin Overlay */}
+      <div className={`fixed transition-all duration-300 z-50 ${
+        isMinimized 
+          ? "bottom-4 right-4 w-80 h-12" 
+          : "bottom-4 right-4 w-96 h-[600px]"
+      }`}>
+        <Card className="shadow-2xl border-primary/20 bg-card/95 backdrop-blur-sm">
+          {/* Plugin Header */}
+          <div className="flex items-center justify-between p-3 border-b">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-gradient-primary rounded-full flex items-center justify-center">
+                <Bot className="w-4 h-4 text-white" />
               </div>
-              <CardDescription>
-                Get AI-powered suggestions and guideline assistance for your rating tasks
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs value={activeMode} onValueChange={setActiveMode} className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="chat" className="flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4" />
-                    Chat Mode
-                  </TabsTrigger>
-                  <TabsTrigger value="rate" className="flex items-center gap-2">
-                    <CheckSquare className="w-4 h-4" />
-                    Rate Mode
-                  </TabsTrigger>
-                </TabsList>
+              <span className="font-medium text-sm">Rater Assistant</span>
+              <Badge className="bg-success/10 text-success text-xs">Active</Badge>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setIsMinimized(!isMinimized)}
+              >
+                {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowPlugin(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
 
-                <TabsContent value="chat" className="space-y-4 mt-6">
-                  {/* Chat History */}
-                  <div className="space-y-3 max-h-80 overflow-y-auto bg-accent/20 rounded-lg p-4">
-                    {chatHistory.map((message) => (
-                      <div key={message.id} className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}>
-                        <div className={`max-w-[80%] p-3 rounded-lg ${
-                          message.type === "user" 
-                            ? "bg-primary text-primary-foreground ml-auto" 
-                            : "bg-card border border-border"
-                        }`}>
-                          <div className="text-sm whitespace-pre-wrap">{message.message}</div>
-                          <div className="text-xs opacity-70 mt-1">{message.timestamp}</div>
-                          {message.citations && (
-                            <div className="mt-2 space-y-1">
-                              {message.citations.map((citation, index) => (
-                                <div key={index} className="flex items-center gap-1 text-xs">
-                                  <BookOpen className="w-3 h-3" />
-                                  <span className="text-primary hover:underline cursor-pointer">
-                                    {citation}
-                                  </span>
-                                  <ExternalLink className="w-3 h-3" />
+          {!isMinimized && (
+            <>
+              {/* Mode Tabs */}
+              <div className="flex border-b">
+                <button
+                  onClick={() => setActiveMode("chat")}
+                  className={`flex-1 p-3 text-sm font-medium transition-colors ${
+                    activeMode === "chat"
+                      ? "border-b-2 border-primary bg-accent/50"
+                      : "hover:bg-accent/30"
+                  }`}
+                >
+                  <MessageSquare className="w-4 h-4 inline mr-2" />
+                  Chat
+                </button>
+                <button
+                  onClick={() => setActiveMode("rate")}
+                  className={`flex-1 p-3 text-sm font-medium transition-colors ${
+                    activeMode === "rate"
+                      ? "border-b-2 border-primary bg-accent/50"
+                      : "hover:bg-accent/30"
+                  }`}
+                >
+                  <Star className="w-4 h-4 inline mr-2" />
+                  Rate
+                </button>
+              </div>
+
+              <CardContent className="p-0 h-[450px] flex flex-col">
+                {activeMode === "chat" ? (
+                  <>
+                    {/* Chat History */}
+                    <ScrollArea className="flex-1 p-4">
+                      <div className="space-y-4">
+                        {chatHistory.map((msg, index) => (
+                          <div key={index} className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}>
+                            <div className={`max-w-[80%] ${
+                              msg.type === "user" 
+                                ? "bg-primary text-primary-foreground" 
+                                : "bg-accent"
+                            } rounded-lg p-3`}>
+                              <div className="text-sm whitespace-pre-line">{msg.message}</div>
+                              {msg.type === "ai" && (
+                                <div className="mt-2 pt-2 border-t border-border/50">
+                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <span>Confidence: {msg.confidence}%</span>
+                                    <span>•</span>
+                                    <span>{msg.sources?.length} sources</span>
+                                  </div>
                                 </div>
-                              ))}
+                              )}
+                              <div className="text-xs opacity-70 mt-1">{msg.timestamp}</div>
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Chat Input */}
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Ask about guidelines, policies, or get help with this task..."
-                      value={chatMessage}
-                      onChange={(e) => setChatMessage(e.target.value)}
-                      className="flex-1"
-                      onKeyPress={(e) => e.key === "Enter" && setChatMessage("")}
-                    />
-                    <Button onClick={() => setChatMessage("")} className="bg-gradient-primary">
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </div>
-
-                  {/* Quick Actions */}
-                  <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setChatMessage("What does the guideline say about this type of content?")}>
-                      Check Guidelines
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => setChatMessage("Show me similar examples")}>
-                      Similar Examples
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => setChatMessage("What are the key factors to consider?")}>
-                      Key Factors
-                    </Button>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="rate" className="space-y-4 mt-6">
-                  {/* Rating Checklist */}
-                  <Card className="bg-accent/30">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <CheckSquare className="w-5 h-5 text-primary" />
-                        Rating Checklist
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {[
-                        { id: "content_reviewed", label: "Content thoroughly reviewed", guideline: "Section 2.1 - Content Review Process" },
-                        { id: "guideline_checked", label: "Relevant guidelines consulted", guideline: "Always reference applicable sections" },
-                        { id: "context_analyzed", label: "Context and intent analyzed", guideline: "Section 4.3 - Context Analysis" },
-                        { id: "confidence_assessed", label: "Confidence level evaluated", guideline: "Rate certainty on 1-10 scale" },
-                      ].map((item) => (
-                        <div key={item.id} className="flex items-start space-x-3">
-                          <Checkbox
-                            id={item.id}
-                            checked={checklist[item.id as keyof typeof checklist]}
-                            onCheckedChange={(checked) => 
-                              setChecklist(prev => ({ ...prev, [item.id]: checked }))
-                            }
-                          />
-                          <div className="flex-1">
-                            <label htmlFor={item.id} className="text-sm font-medium cursor-pointer">
-                              {item.label}
-                            </label>
-                            <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                              <BookOpen className="w-3 h-3" />
-                              {item.guideline}
-                              <ExternalLink className="w-3 h-3 cursor-pointer hover:text-primary" />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-
-                  {/* AI Suggestion */}
-                  <Card className="border-l-4 border-l-primary bg-gradient-to-r from-primary/5 to-transparent">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-primary" />
-                        AI Suggestion
-                        <Badge className="bg-primary/10 text-primary border-primary/20">
-                          {(aiSuggestion.confidence * 100).toFixed(0)}% confident
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {/* Suggested Rating */}
-                      <div className="grid grid-cols-2 gap-4">
-                        {Object.entries(aiSuggestion.rating).map(([key, value]) => (
-                          <div key={key} className="bg-card p-3 rounded-lg border">
-                            <div className="text-sm text-muted-foreground capitalize">{key.replace('_', ' ')}</div>
-                            <div className="font-semibold text-foreground">{String(value).replace('_', ' ')}</div>
                           </div>
                         ))}
                       </div>
+                    </ScrollArea>
 
-                      {/* Confidence Bar */}
-                      <div>
-                        <div className="flex justify-between text-sm mb-2">
-                          <span>AI Confidence</span>
-                          <span>{(aiSuggestion.confidence * 100).toFixed(0)}%</span>
+                    {/* Chat Input */}
+                    <div className="p-4 border-t">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Ask about guidelines, get rating help..."
+                          value={chatMessage}
+                          onChange={(e) => setChatMessage(e.target.value)}
+                          className="flex-1"
+                        />
+                        <Button size="sm">
+                          <Send className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  /* Rate Mode */
+                  <div className="p-4 space-y-4">
+                    {/* AI Suggestion */}
+                    <div className="bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Lightbulb className="w-4 h-4 text-primary" />
+                        <span className="font-medium text-sm">AI Suggestion</span>
+                        <Badge className="bg-primary/10 text-primary text-xs">
+                          {aiSuggestion.confidence}% confidence
+                        </Badge>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">Recommended Rating:</span>
+                          <Badge className="bg-success/10 text-success">{aiSuggestion.rating}</Badge>
                         </div>
-                        <Progress value={aiSuggestion.confidence * 100} className="h-2" />
-                      </div>
-
-                      {/* Reasoning */}
-                      <div className="bg-accent/50 p-3 rounded-lg">
-                        <h4 className="font-medium text-sm mb-2">Reasoning:</h4>
-                        <p className="text-sm text-muted-foreground">{aiSuggestion.reasoning}</p>
-                      </div>
-
-                      {/* Evidence */}
-                      <div>
-                        <h4 className="font-medium text-sm mb-2">Supporting Evidence:</h4>
-                        <div className="space-y-1">
-                          {aiSuggestion.evidence.map((item, index) => (
-                            <div key={index} className="flex items-center gap-2 text-sm">
-                              <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                              <span className="text-primary hover:underline cursor-pointer">{item}</span>
-                              <ExternalLink className="w-3 h-3 text-muted-foreground" />
-                            </div>
+                        
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {aiSuggestion.reasoning}
+                        </p>
+                        
+                        <div className="flex items-center gap-1 flex-wrap">
+                          {aiSuggestion.guidelines.map((guideline, index) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              <BookOpen className="w-3 h-3 mr-1" />
+                              {guideline}
+                            </Badge>
                           ))}
                         </div>
                       </div>
+                    </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex gap-2 pt-2">
-                        <Button size="sm" className="bg-success hover:bg-success/90">
-                          <ThumbsUp className="w-4 h-4 mr-2" />
-                          Accept Suggestion
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <ThumbsDown className="w-4 h-4 mr-2" />
-                          Modify Rating
-                        </Button>
+                    {/* Quick Actions */}
+                    <div className="space-y-2">
+                      <Button className="w-full" size="sm">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Accept AI Suggestion
+                      </Button>
+                      <Button variant="outline" className="w-full" size="sm">
+                        View Full Guidelines
+                      </Button>
+                    </div>
+
+                    {/* Checklist */}
+                    <div className="space-y-2">
+                      <span className="text-sm font-medium">Quick Checklist:</span>
+                      <div className="space-y-1">
+                        {[
+                          "Content relevance verified",
+                          "Language authenticity checked", 
+                          "Specific details present",
+                          "Balanced perspective maintained"
+                        ].map((item, index) => (
+                          <div key={index} className="flex items-center gap-2 text-xs">
+                            <CheckCircle className="w-3 h-3 text-success" />
+                            <span className="text-muted-foreground">{item}</span>
+                          </div>
+                        ))}
                       </div>
-
-                      <div className="text-xs text-muted-foreground bg-warning/10 p-2 rounded border border-warning/20">
-                        💡 Suggestion: {aiSuggestion.suggestedNext}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Task Context */}
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle className="text-lg">Current Task</CardTitle>
-              <CardDescription>TSK_4567 - Content Moderation</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="bg-accent/30 p-3 rounded-lg">
-                <div className="text-sm font-medium mb-1">Task Preview</div>
-                <div className="text-xs text-muted-foreground">
-                  Social media post containing political commentary about upcoming elections...
-                </div>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Project:</span>
-                  <span className="font-medium">Content Moderation</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Guidelines:</span>
-                  <span className="font-medium">Safety Policy v2.1</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Priority:</span>
-                  <Badge variant="outline" className="text-xs">Standard</Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* History */}
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <History className="w-5 h-5" />
-                Recent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="border-l-2 border-success pl-3">
-                  <div className="text-sm font-medium">Task completed</div>
-                  <div className="text-xs text-muted-foreground">TSK_4566 - 5 minutes ago</div>
-                </div>
-                <div className="border-l-2 border-primary pl-3">
-                  <div className="text-sm font-medium">AI suggestion accepted</div>
-                  <div className="text-xs text-muted-foreground">TSK_4565 - 12 minutes ago</div>
-                </div>
-                <div className="border-l-2 border-warning pl-3">
-                  <div className="text-sm font-medium">Feedback received</div>
-                  <div className="text-xs text-muted-foreground">Accuracy improvement - 2 hours ago</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Usage & Billing */}
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <CreditCard className="w-5 h-5" />
-                Usage & Credits
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>AI Suggestions Today</span>
-                  <span className="font-medium">23/50</span>
-                </div>
-                <Progress value={46} className="h-2" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Chat Queries</span>
-                  <span className="font-medium">12/100</span>
-                </div>
-                <Progress value={12} className="h-2" />
-              </div>
-              <Button variant="outline" size="sm" className="w-full">
-                Upgrade Plan
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </>
+          )}
+        </Card>
       </div>
     </div>
   );
