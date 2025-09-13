@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Bot, 
   MessageSquare, 
@@ -15,14 +17,24 @@ import {
   X,
   Send,
   Minimize2,
-  Maximize2
+  Maximize2,
+  Shield,
+  AlertTriangle,
+  Flag,
+  ExternalLink
 } from "lucide-react";
 
 const RaterPlugin = () => {
   const [showPlugin, setShowPlugin] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [activeMode, setActiveMode] = useState("chat");
+  const [activeMode, setActiveMode] = useState("rate");
   const [chatMessage, setChatMessage] = useState("");
+  const [checklistItems, setChecklistItems] = useState({
+    contentReviewed: false,
+    guidelinesConsulted: false,
+    contextAnalyzed: false,
+    confidenceEvaluated: false
+  });
   
   const chatHistory = [
     {
@@ -40,10 +52,24 @@ const RaterPlugin = () => {
   ];
 
   const aiSuggestion = {
-    rating: "Good",
+    safety: "unsafe",
+    category: "political content",
+    severity: "medium",
+    action: "flag for review",
     confidence: 87,
-    reasoning: "Content shows specific product details and balanced perspective. Language appears authentic with concrete examples.",
-    guidelines: ["Relevance Check", "Authenticity Assessment", "Detail Analysis"]
+    reasoning: "Content contains political messaging with potential for controversy. Safety guidelines section 3.2.1 indicates this should be flagged for human review.",
+    supportingEvidence: [
+      "Political content policy (Section 3.2.1)",
+      "Similar case: TSK_4321 - flagged correctly",
+      "Keyword analysis: 95% political indicators"
+    ]
+  };
+
+  const handleChecklistChange = (item: keyof typeof checklistItems) => {
+    setChecklistItems(prev => ({
+      ...prev,
+      [item]: !prev[item]
+    }));
   };
 
   if (!showPlugin) {
@@ -67,8 +93,8 @@ const RaterPlugin = () => {
               <div className="w-6 h-6 bg-gradient-primary rounded-full flex items-center justify-center">
                 <Bot className="w-4 h-4 text-white" />
               </div>
-              <span className="font-medium text-sm">Rater Assistant</span>
-              <Badge className="bg-success/10 text-success text-xs">Active</Badge>
+              <span className="font-medium text-sm">AI Rater Assistant</span>
+              <Badge className="bg-primary/10 text-primary text-xs">Premium</Badge>
             </div>
             <div className="flex items-center gap-1">
               <Button 
@@ -101,7 +127,7 @@ const RaterPlugin = () => {
                   }`}
                 >
                   <MessageSquare className="w-4 h-4 inline mr-2" />
-                  Chat
+                  Chat Mode
                 </button>
                 <button
                   onClick={() => setActiveMode("rate")}
@@ -112,7 +138,7 @@ const RaterPlugin = () => {
                   }`}
                 >
                   <Star className="w-4 h-4 inline mr-2" />
-                  Rate
+                  Rate Mode
                 </button>
               </div>
 
@@ -163,67 +189,197 @@ const RaterPlugin = () => {
                   </>
                 ) : (
                   /* Rate Mode */
-                  <div className="p-4 space-y-4">
+                  <ScrollArea className="flex-1">
+                    <div className="p-4 space-y-6">
+                    {/* Rating Checklist */}
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-medium text-foreground">Rating Checklist</h3>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="content-reviewed"
+                            checked={checklistItems.contentReviewed}
+                            onCheckedChange={() => handleChecklistChange('contentReviewed')}
+                          />
+                          <label 
+                            htmlFor="content-reviewed" 
+                            className="text-sm text-muted-foreground cursor-pointer"
+                          >
+                            Content thoroughly reviewed
+                          </label>
+                          <a 
+                            href="#" 
+                            className="text-primary hover:underline text-xs flex items-center gap-1"
+                          >
+                            Section 2.1 - Content Review Process
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="guidelines-consulted"
+                            checked={checklistItems.guidelinesConsulted}
+                            onCheckedChange={() => handleChecklistChange('guidelinesConsulted')}
+                          />
+                          <label 
+                            htmlFor="guidelines-consulted" 
+                            className="text-sm text-muted-foreground cursor-pointer"
+                          >
+                            Relevant guidelines consulted
+                          </label>
+                          <a 
+                            href="#" 
+                            className="text-primary hover:underline text-xs flex items-center gap-1"
+                          >
+                            Always reference applicable sections
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="context-analyzed"
+                            checked={checklistItems.contextAnalyzed}
+                            onCheckedChange={() => handleChecklistChange('contextAnalyzed')}
+                          />
+                          <label 
+                            htmlFor="context-analyzed" 
+                            className="text-sm text-muted-foreground cursor-pointer"
+                          >
+                            Context and intent analyzed
+                          </label>
+                          <a 
+                            href="#" 
+                            className="text-primary hover:underline text-xs flex items-center gap-1"
+                          >
+                            Section 4.3 - Context Analysis
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="confidence-evaluated"
+                            checked={checklistItems.confidenceEvaluated}
+                            onCheckedChange={() => handleChecklistChange('confidenceEvaluated')}
+                          />
+                          <label 
+                            htmlFor="confidence-evaluated" 
+                            className="text-sm text-muted-foreground cursor-pointer"
+                          >
+                            Confidence level evaluated
+                          </label>
+                          <a 
+                            href="#" 
+                            className="text-primary hover:underline text-xs flex items-center gap-1"
+                          >
+                            Rate certainty on 1-10 scale
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* AI Suggestion */}
-                    <div className="bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Lightbulb className="w-4 h-4 text-primary" />
-                        <span className="font-medium text-sm">AI Suggestion</span>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-medium text-foreground">AI Suggestion</h3>
                         <Badge className="bg-primary/10 text-primary text-xs">
-                          {aiSuggestion.confidence}% confidence
+                          {aiSuggestion.confidence}% confident
                         </Badge>
                       </div>
                       
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">Recommended Rating:</span>
-                          <Badge className="bg-success/10 text-success">{aiSuggestion.rating}</Badge>
-                        </div>
-                        
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          {aiSuggestion.reasoning}
-                        </p>
-                        
-                        <div className="flex items-center gap-1 flex-wrap">
-                          {aiSuggestion.guidelines.map((guideline, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              <BookOpen className="w-3 h-3 mr-1" />
-                              {guideline}
+                      <div className="bg-card border rounded-lg p-4 space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <Shield className="w-4 h-4 text-destructive" />
+                              <span className="text-sm font-medium">Safety:</span>
+                            </div>
+                            <Badge variant="destructive" className="text-xs">
+                              {aiSuggestion.safety}
                             </Badge>
-                          ))}
+                          </div>
+                          
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <BookOpen className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-sm font-medium">Category:</span>
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {aiSuggestion.category}
+                            </Badge>
+                          </div>
+                          
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <AlertTriangle className="w-4 h-4 text-warning" />
+                              <span className="text-sm font-medium">Severity:</span>
+                            </div>
+                            <Badge variant="secondary" className="text-xs">
+                              {aiSuggestion.severity}
+                            </Badge>
+                          </div>
+                          
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <Flag className="w-4 h-4 text-primary" />
+                              <span className="text-sm font-medium">Action:</span>
+                            </div>
+                            <Badge className="bg-primary/10 text-primary text-xs">
+                              {aiSuggestion.action}
+                            </Badge>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">AI Confidence</span>
+                            <span className="text-sm text-muted-foreground">{aiSuggestion.confidence}%</span>
+                          </div>
+                          <Progress value={aiSuggestion.confidence} className="h-2" />
+                        </div>
+                        
+                        <div>
+                          <span className="text-sm font-medium block mb-2">Reasoning:</span>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {aiSuggestion.reasoning}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <span className="text-sm font-medium block mb-2">Supporting Evidence:</span>
+                          <ul className="space-y-1">
+                            {aiSuggestion.supportingEvidence.map((evidence, index) => (
+                              <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                                <span className="text-primary mt-1">•</span>
+                                {evidence}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        
+                        <div className="flex gap-2 pt-2">
+                          <Button className="flex-1 bg-green-600 hover:bg-green-700">
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Accept Suggestion
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            Modify Rating
+                          </Button>
+                        </div>
+                        
+                        <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg">
+                          <Lightbulb className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                          <p className="text-xs text-muted-foreground">
+                            <span className="font-medium">Suggestion:</span> Review context for additional nuance before final decision.
+                          </p>
                         </div>
                       </div>
                     </div>
-
-                    {/* Quick Actions */}
-                    <div className="space-y-2">
-                      <Button className="w-full" size="sm">
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Accept AI Suggestion
-                      </Button>
-                      <Button variant="outline" className="w-full" size="sm">
-                        View Full Guidelines
-                      </Button>
                     </div>
-
-                    {/* Checklist */}
-                    <div className="space-y-2">
-                      <span className="text-sm font-medium">Quick Checklist:</span>
-                      <div className="space-y-1">
-                        {[
-                          "Content relevance verified",
-                          "Language authenticity checked", 
-                          "Specific details present",
-                          "Balanced perspective maintained"
-                        ].map((item, index) => (
-                          <div key={index} className="flex items-center gap-2 text-xs">
-                            <CheckCircle className="w-3 h-3 text-success" />
-                            <span className="text-muted-foreground">{item}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  </ScrollArea>
                 )}
               </CardContent>
             </>
