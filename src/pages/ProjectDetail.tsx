@@ -9,6 +9,7 @@ import WorkflowBuilder from "./WorkflowBuilder";
 import KnowledgeBase from "./KnowledgeBase";
 import RaterProfiles from "./RaterProfiles";
 import QCDashboard from "./QCDashboard";
+import UIDesigner from "./UIDesigner";
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
@@ -128,23 +129,9 @@ const ProjectDetail = () => {
         </TabsContent>
 
         <TabsContent value="ui-designer" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Plugin UI Designer</CardTitle>
-              <CardDescription>
-                Design the user interface for the {project.type === 'rater' ? 'Rater' : 'QC'} plugin
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-accent/50 rounded-lg p-8 text-center">
-                <Monitor className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">UI Designer Coming Soon</h3>
-                <p className="text-muted-foreground">
-                  Drag-and-drop interface designer for creating custom plugin layouts
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="h-[calc(100vh-200px)]">
+            <UIDesigner projectType={project.type} />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

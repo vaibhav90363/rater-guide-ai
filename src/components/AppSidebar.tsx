@@ -1,6 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  BarChart3,
   FolderOpen,
   GitBranch,
   BookOpen,
@@ -22,7 +21,6 @@ import {
 } from "@/components/ui/sidebar";
 
 const navigationItems = [
-  { title: "Dashboard", url: "/", icon: BarChart3 },
   { title: "Projects", url: "/projects", icon: FolderOpen },
 ];
 

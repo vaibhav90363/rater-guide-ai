@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { geminiService, ChatMessage, AIAnalysis } from "@/services/geminiApi";
 import { RATER_SYSTEM_PROMPT } from "@/data/systemPrompts";
 import { 
@@ -25,12 +26,14 @@ import {
   Shield,
   AlertTriangle,
   Flag,
-  ExternalLink
+  ExternalLink,
+  Move
 } from "lucide-react";
 
 const RaterPlugin = () => {
   const [showPlugin, setShowPlugin] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [activeMode, setActiveMode] = useState("rate");
   const [chatMessage, setChatMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -135,91 +138,109 @@ const RaterPlugin = () => {
   }
 
   return (
-    <div className="relative">
-      <RaterPlatform onPluginToggle={() => setShowPlugin(false)} showPlugin={true} />
-      
-      {/* Plugin Overlay */}
-      <div className={`fixed transition-all duration-300 z-50 ${
-        isMinimized 
-          ? "bottom-4 right-4 w-80 h-12" 
-          : "bottom-4 right-4 w-96 h-[600px]"
-      }`}>
-        <Card className="shadow-2xl border-primary/20 bg-card/95 backdrop-blur-sm">
-          {/* Plugin Header */}
-          <div className="flex items-center justify-between p-3 border-b">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-gradient-primary rounded-full flex items-center justify-center">
-                <Bot className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-medium text-sm">AI Rater Assistant</span>
-              <Badge className="bg-primary/10 text-primary text-xs">Premium</Badge>
-            </div>
-            <div className="flex items-center gap-1">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => setIsMinimized(!isMinimized)}
-              >
-                {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => setShowPlugin(false)}
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-
-          {!isMinimized && (
-            <>
-              {/* Mode Tabs */}
-              <div className="flex border-b">
-                <button
-                  onClick={() => setActiveMode("chat")}
-                  className={`flex-1 p-3 text-sm font-medium transition-colors ${
-                    activeMode === "chat"
-                      ? "border-b-2 border-primary bg-accent/50"
-                      : "hover:bg-accent/30"
-                  }`}
-                >
-                  <MessageSquare className="w-4 h-4 inline mr-2" />
-                  Chat Mode
-                </button>
-                <button
-                  onClick={() => setActiveMode("rate")}
-                  className={`flex-1 p-3 text-sm font-medium transition-colors ${
-                    activeMode === "rate"
-                      ? "border-b-2 border-primary bg-accent/50"
-                      : "hover:bg-accent/30"
-                  }`}
-                >
-                  <Star className="w-4 h-4 inline mr-2" />
-                  Rate Mode
-                </button>
-                <button
-                  onClick={() => setActiveMode("setup")}
-                  className={`flex-1 p-3 text-sm font-medium transition-colors ${
-                    activeMode === "setup"
-                      ? "border-b-2 border-primary bg-accent/50"
-                      : "hover:bg-accent/30"
-                  }`}
-                >
-                  <BookOpen className="w-4 h-4 inline mr-2" />
-                  Setup
-                </button>
-              </div>
-
-              <CardContent className="p-0 h-[450px] flex flex-col">
-                {activeMode === "setup" ? (
-                  <div className="p-4 h-full">
-                    <GuidelineUpload 
-                      type="rater" 
-                      onGuidelinesChange={setGuidelines}
-                    />
+    <div className="relative h-screen">
+      <ResizablePanelGroup direction="horizontal" className="h-full">
+        {/* Main Platform */}
+        <ResizablePanel defaultSize={isExpanded ? 50 : 100} minSize={30}>
+          <RaterPlatform onPluginToggle={() => setShowPlugin(false)} showPlugin={true} />
+        </ResizablePanel>
+        
+        {/* AI Assistant Panel */}
+        {showPlugin && (
+          <>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={isExpanded ? 50 : 0} minSize={20} maxSize={70}>
+              <div className={`h-full transition-all duration-300 ${
+                isMinimized 
+                  ? "h-12" 
+                  : "h-full"
+              }`}>
+                <Card className="h-full shadow-2xl border-primary/20 bg-card/95 backdrop-blur-sm flex flex-col">
+                  {/* Plugin Header */}
+                  <div className="flex items-center justify-between p-3 border-b">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-gradient-primary rounded-full flex items-center justify-center">
+                        <Bot className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="font-medium text-sm">AI Rater Assistant</span>
+                      <Badge className="bg-primary/10 text-primary text-xs">Premium</Badge>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        title={isExpanded ? "Collapse" : "Expand"}
+                      >
+                        {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setIsMinimized(!isMinimized)}
+                        title={isMinimized ? "Restore" : "Minimize"}
+                      >
+                        {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setShowPlugin(false)}
+                        title="Close"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                ) : activeMode === "chat" ? (
+
+                  {!isMinimized && (
+                    <>
+                      {/* Mode Tabs */}
+                      <div className="flex border-b">
+                        <button
+                          onClick={() => setActiveMode("chat")}
+                          className={`flex-1 p-3 text-sm font-medium transition-colors ${
+                            activeMode === "chat"
+                              ? "border-b-2 border-primary bg-accent/50"
+                              : "hover:bg-accent/30"
+                          }`}
+                        >
+                          <MessageSquare className="w-4 h-4 inline mr-2" />
+                          Chat Mode
+                        </button>
+                        <button
+                          onClick={() => setActiveMode("rate")}
+                          className={`flex-1 p-3 text-sm font-medium transition-colors ${
+                            activeMode === "rate"
+                              ? "border-b-2 border-primary bg-accent/50"
+                              : "hover:bg-accent/30"
+                          }`}
+                        >
+                          <Star className="w-4 h-4 inline mr-2" />
+                          Rate Mode
+                        </button>
+                        <button
+                          onClick={() => setActiveMode("setup")}
+                          className={`flex-1 p-3 text-sm font-medium transition-colors ${
+                            activeMode === "setup"
+                              ? "border-b-2 border-primary bg-accent/50"
+                              : "hover:bg-accent/30"
+                          }`}
+                        >
+                          <BookOpen className="w-4 h-4 inline mr-2" />
+                          Setup
+                        </button>
+                      </div>
+
+                      <CardContent className="p-0 flex-1 flex flex-col">
+                        {activeMode === "setup" ? (
+                          <div className="p-4 h-full">
+                            <GuidelineUpload 
+                              type="rater" 
+                              onGuidelinesChange={setGuidelines}
+                            />
+                          </div>
+                        ) : activeMode === "chat" ? (
                   <>
                     {/* Chat History */}
                     <ScrollArea className="flex-1 p-4">
@@ -455,12 +476,16 @@ const RaterPlugin = () => {
                     </div>
                     </div>
                   </ScrollArea>
-                )}
-              </CardContent>
-            </>
-          )}
-        </Card>
-      </div>
+                        )}
+                      </CardContent>
+                    </>
+                  )}
+                </Card>
+              </div>
+            </ResizablePanel>
+          </>
+        )}
+      </ResizablePanelGroup>
     </div>
   );
 };
