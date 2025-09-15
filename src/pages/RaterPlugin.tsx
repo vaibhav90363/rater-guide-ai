@@ -38,6 +38,7 @@ const RaterPlugin = () => {
   const [chatMessage, setChatMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [guidelines, setGuidelines] = useState("");
+  const [apiConnectionStatus, setApiConnectionStatus] = useState<'idle' | 'testing' | 'connected' | 'error'>('idle');
   const [checklistItems, setChecklistItems] = useState({
     contentReviewed: false,
     guidelinesConsulted: false,
@@ -110,18 +111,84 @@ const RaterPlugin = () => {
     }
   };
 
+  const testApiConnection = async () => {
+    setApiConnectionStatus('testing');
+    try {
+      const result = await geminiService.testConnection();
+      setApiConnectionStatus(result.success ? 'connected' : 'error');
+      
+      if (result.success) {
+        // Add success message to chat
+        const successMessage: ChatMessage = {
+          type: 'ai',
+          message: `✅ ${result.message}\n\nI'm ready to help you with rating guidance! You can now ask me questions about rating criteria, guidelines, or get help with specific content analysis.`,
+          timestamp: new Date().toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }),
+          confidence: 100,
+          sources: ['API Connection Test']
+        };
+        setChatHistory(prev => [...prev, successMessage]);
+      }
+    } catch (error) {
+      setApiConnectionStatus('error');
+      console.error('API connection test failed:', error);
+    }
+  };
+
   const generateAIAnalysis = async () => {
+    if (!guidelines) {
+      const noGuidelinesMessage: ChatMessage = {
+        type: 'ai',
+        message: "⚠️ No guidelines loaded. Please upload guidelines in the Setup tab to get AI analysis.",
+        timestamp: new Date().toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        confidence: 0,
+        sources: ['System']
+      };
+      setChatHistory(prev => [...prev, noGuidelinesMessage]);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const taskContent = "Sample product review: This laptop has amazing build quality and the packaging was great. Really happy with my purchase!";
-      const analysis = await geminiService.generateRatingAnalysis(
+      const analysis = await geminiService.generateDetailedAnalysis(
         taskContent,
+        'rater',
         RATER_SYSTEM_PROMPT,
         guidelines
       );
       setAiAnalysis(analysis);
+      
+      // Add analysis to chat
+      const analysisMessage: ChatMessage = {
+        type: 'ai',
+        message: `📊 **AI Analysis Complete**\n\n**Rating Suggestion:** ${analysis.category || 'General'}\n**Confidence:** ${analysis.confidence}%\n**Reasoning:** ${analysis.reasoning}\n\n**Sources:** ${analysis.sources.join(', ')}`,
+        timestamp: new Date().toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        confidence: analysis.confidence,
+        sources: analysis.sources
+      };
+      setChatHistory(prev => [...prev, analysisMessage]);
     } catch (error) {
       console.error('Failed to generate AI analysis:', error);
+      const errorMessage: ChatMessage = {
+        type: 'ai',
+        message: "❌ Failed to generate AI analysis. Please check your connection and try again.",
+        timestamp: new Date().toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        confidence: 0,
+        sources: ['Error']
+      };
+      setChatHistory(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -163,7 +230,19 @@ const RaterPlugin = () => {
                         <Bot className="w-4 h-4 text-white" />
                       </div>
                       <span className="font-medium text-sm">AI Rater Assistant</span>
-                      <Badge className="bg-primary/10 text-primary text-xs">Premium</Badge>
+                      <Badge className={`text-xs ${
+                        apiConnectionStatus === 'connected' 
+                          ? 'bg-green-100 text-green-700' 
+                          : apiConnectionStatus === 'error'
+                          ? 'bg-red-100 text-red-700'
+                          : apiConnectionStatus === 'testing'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : 'bg-primary/10 text-primary'
+                      }`}>
+                        {apiConnectionStatus === 'connected' ? 'Connected' : 
+                         apiConnectionStatus === 'error' ? 'Error' :
+                         apiConnectionStatus === 'testing' ? 'Testing...' : 'Ready'}
+                      </Badge>
                     </div>
                     <div className="flex items-center gap-1">
                       <Button 
@@ -234,7 +313,19 @@ const RaterPlugin = () => {
 
                       <CardContent className="p-0 flex-1 flex flex-col">
                         {activeMode === "setup" ? (
-                          <div className="p-4 h-full">
+                          <div className="p-4 h-full space-y-4">
+                            <div className="flex items-center justify-between">
+                              <h3 className="text-lg font-semibold">Setup & Configuration</h3>
+                              <Button 
+                                onClick={testApiConnection}
+                                disabled={apiConnectionStatus === 'testing'}
+                                variant={apiConnectionStatus === 'connected' ? 'default' : 'outline'}
+                                size="sm"
+                              >
+                                {apiConnectionStatus === 'testing' ? 'Testing...' : 
+                                 apiConnectionStatus === 'connected' ? '✅ Connected' : 'Test API Connection'}
+                              </Button>
+                            </div>
                             <GuidelineUpload 
                               type="rater" 
                               onGuidelinesChange={setGuidelines}
